@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <script src="jquery-2.0.3/build/jquery.js"></script>
+    <script src="underscore-1.5.2/build/underscore.js"></script>
+    <script src="backbone-1.1.0/build/backbone.js"></script>
+  </head>
+  <body>
+    <script type="text/javascript">
+        
+      var Profile = Backbone.Model.extend({
+        defaults : {
+          name    : null,
+          gender  : null,
+          picture : null
+        }
+      });
+
+      var profile = new Profile({
+        name    : "Christopher Pitt",
+        gender  : "male",
+        picture : "http://placehold.it/200x200"
+      });
+
+      console.log(
+        "name    : " + profile.get("name") + "\n" +
+        "gender  : " + profile.get("gender") + "\n" +
+        "picture : " + profile.get("picture")
+      );
+
+    </script>
+  </body>
+</html>

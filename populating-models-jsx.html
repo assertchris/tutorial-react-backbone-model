@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <script src="jquery-2.0.3/build/jquery.js"></script>
+    <script src="underscore-1.5.2/build/underscore.js"></script>
+    <script src="backbone-1.1.0/build/backbone.js"></script>
+    <script src="react-0.8.0/build/react.js"></script>
+    <script src="react-0.8.0/build/JSXTransformer.js"></script>
+    <style>
+
+      body {
+        padding     : 20px;
+        font-family : helvetica, arial;
+      }
+
+      .picture {
+        margin : 10px 0;
+      }
+
+    </style>
+  </head>
+  <body>
+    <button class="connect">Connect</button>
+    <div class="target"></div>
+    <div id="fb-root"></div>
+    <script type="text/jsx">
+
+      /**
+       * @jsx React.DOM
+       */
+
+       var Profile = Backbone.Model.extend({
+        defaults : {
+          name    : null,
+          gender  : null,
+          picture : null
+        }
+      });
+        
+      var CardComponent = React.createClass({
+        componentWillMount : function() {
+          profile.on("change", (function() {
+            this.forceUpdate();
+          }.bind(this)));
+        },
+        componentWillUnmount : function() {
+          profile.off("change");
+        },
+        render : function() {
+          return (
+            <div className="card">
+              <div className="picture">
+                <img src={this.props.profile.get("picture")} />
+              </div>
+              <div className="name">
+                {this.props.profile.get("name")}
+                <small>
+                  ({this.props.profile.get("gender")})
+                </small>
+              </div>
+            </div>
+          );
+        }
+      });
+
+      var connect = document.querySelector(".connect");
+      var target  = document.querySelector(".target");
+      var profile = new Profile();
+
+      var fetchProfile = function() {
+        React.renderComponent(
+          <CardComponent profile={profile} />,
+          target
+        );
+
+        FB.api("/me", "get", {}, function(result) {
+          profile.set("name", result.name);
+          profile.set("gender", result.gender);
+        });
+
+        var params = "?redirect=false&width=200&height=200";
+
+        FB.api("/me/picture" + params, "get", {}, function(result) {
+          profile.set("picture", result.data.url);
+        });
+      };
+
+      var login = function() {
+        FB.login(function() {
+          fetchProfile();
+        });
+      };
+
+      window.fbAsyncInit = function() {
+
+        FB.init({
+          appId  : "579585842125092",
+          status : true,
+          xfbml  : true
+        });
+
+        connect.addEventListener("click", function() {
+          login();
+        });
+
+        FB.Event.subscribe("auth.authResponseChange", function(response) {
+          if (response.status === "connected") {
+            fetchProfile();
+          }
+        });
+
+      };
+
+      (function(d, s, id){
+         var js, fjs = d.getElementsByTagName(s)[0];
+         if (d.getElementById(id)) {return;}
+         js = d.createElement(s); js.id = id;
+         js.src = "//connect.facebook.net/en_US/all.js";
+         fjs.parentNode.insertBefore(js, fjs);
+       }(document, "script", "facebook-jssdk"));
+
+    </script>
+  </body>
+</html>
